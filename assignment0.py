@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
+
 class ModelPredictiveControl:
     def __init__(self):
         self.horizon = 40
@@ -12,15 +13,17 @@ class ModelPredictiveControl:
         knob_temp = knob_angle * 0.5
         # Calculate dT or change in temperature.
         tau = 6
-        dT = 0
+        dT = (knob_temp - prev_temp) / tau
         # new temp = current temp + change in temp.
-        return prev_temp + dT 
+        return prev_temp + dT
 
     def cost_function(self, u):
         cost = 0.0
         temp = 0.0
         for i in range(0, self.horizon):
             temp = self.plant_model(u[i], temp)
+            ideal_temp = 30
+            cost += abs(ideal_temp - temp)
 
         return cost
 
@@ -36,13 +39,7 @@ for i in range(mpc.horizon):
 u = np.ones(mpc.horizon)
 
 # Non-linear optimization.
-u_solution = minimize(mpc.cost_function,
-                      x0=u,
-                      method='SLSQP',
-                      bounds=bounds,
-                      tol = 1e-8)
-
-
+u_solution = minimize(mpc.cost_function, x0=u, method="SLSQP", bounds=bounds, tol=1e-8)
 
 # --------------------------
 # Calculate data for Plot 1.
@@ -59,20 +56,20 @@ for t in range(40):
 
 # Create Plot 1 - Constant Input
 # Subplot 1
-plt.figure(figsize=(8,8))
+plt.figure(figsize=(8, 8))
 plt.subplot(211)
 plt.title("Constant Input")
 plt.ylabel("Knob Angle")
 # Enter Data
-plt.plot(t_list, knob_angle_list, 'k')
-plt.ylim(0,180)
+plt.plot(t_list, knob_angle_list, "k")
+plt.ylim(0, 180)
 
 # Subplot 2
 plt.subplot(212)
 plt.ylabel("Water Temp")
 # Enter Data
-plt.plot(t_list, water_temp_list, 'ro')
-plt.ylim(0,50)
+plt.plot(t_list, water_temp_list, "ro")
+plt.ylim(0, 50)
 plt.show()
 
 # --------------------------
@@ -90,18 +87,18 @@ for t in range(40):
 
 # Plot 2 - MPC
 # Subplot 1
-plt.figure(figsize=(8,8))
+plt.figure(figsize=(8, 8))
 plt.subplot(211)
 plt.title("MPC")
 plt.ylabel("Knob Angle")
 # Enter data
-plt.plot(t_list, knob_angle_list, 'k')
-plt.ylim(0,180)
+plt.plot(t_list, knob_angle_list, "k")
+plt.ylim(0, 180)
 
 # Subplot 2
 plt.subplot(212)
 plt.ylabel("Water Temp")
 # Enter data
-plt.plot(t_list, water_temp_list, 'ro')
-plt.ylim(0,50)
+plt.plot(t_list, water_temp_list, "ro")
+plt.ylim(0, 50)
 plt.show()
